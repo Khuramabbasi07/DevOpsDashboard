@@ -1,0 +1,10 @@
+CREATE DATABASE DevOpsDB;
+USE DevOpsDB;
+
+CREATE TABLE Deployments (
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Version NVARCHAR(50),
+    DeployedAt DATETIME DEFAULT GETDATE()
+);
+
+INSERT INTO Deployments (Version) VALUES ('v1.0.0');
