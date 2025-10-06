@@ -1,0 +1,42 @@
+name: Build, Test & Deploy to IIS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Test Backend
+        run: echo "Optional tests"
+
+      - name: Deploy Frontend to IIS
+        shell: pwsh
+        run: |
+          $source = "${{ github.workspace }}\frontend"
+          $destination = "D:\IIS Sites\DevOpsDashboard"
+          if (Test-Path $destination) { Remove-Item $destination -Recurse -Force }
+          New-Item -ItemType Directory -Path $destination | Out-Null
+          Copy-Item -Path "$source\*" -Destination $destination -Recurse -Force
+
+      - name: Restart IIS
+        shell: pwsh
+        run: |
+          Import-Module WebAdministration
+          Stop-Website -Name "DevOpsDashboard" -ErrorAction SilentlyContinue
+          Start-Website -Name "DevOpsDashboard"
